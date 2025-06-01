@@ -1,7 +1,7 @@
 import pytest
 
-from src.utils.file_utils import save_report
-from src.lib.log_parser import parse_msg3_logs
+from utils.file_utils import save_report
+from lib.log_parser import parse_msg3_logs
 
 @pytest.mark.smoke
 def test_log_success_rate_above_threshold(default_log_file, default_threshold):

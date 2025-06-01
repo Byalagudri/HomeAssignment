@@ -1,6 +1,6 @@
 import pytest
 
-from src.lib.api_client import get_cad_api_data
+from lib import get_cad_api_data
 
 @pytest.mark.smoke
 def test_cad_api_response_status():
