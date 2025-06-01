@@ -1,27 +1,36 @@
 import re
 from collections import defaultdict
 
+import re
+
 def parse_msg3_logs(log_path):
-    pattern_success = re.compile(r"type\s+MSG3.*?status\s+success", re.IGNORECASE)
-    pattern_failure = re.compile(r"type\s+MSG3.*?status\s+(?!success)\w+", re.IGNORECASE)
+    success_pattern = re.compile(r"type\s+MSG3.*?status\s+success", re.IGNORECASE)
+    failure_pattern = re.compile(r"type\s+MSG3.*?status\s+(?!success)\w+", re.IGNORECASE)
+    time_pattern = re.compile(r"(\d{4}-\d{2}-\d{2} \d{2})")
 
-    total_success = 0
-    total_failure = 0
-    hourly_data = defaultdict(lambda: {"success": 0, "failure": 0})
+    total_success = total_failure = 0
+    hourly_data = {}  # Regular dictionary
 
-    with open(log_path, "r") as f:
+    with open(log_path) as f:
         for line in f:
-            match_time = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}):\d{2}:\d{2}", line)
-            if match_time:
-                hour = match_time.group(1)
-                if pattern_success.search(line):
-                    total_success += 1
-                    hourly_data[hour]["success"] += 1
-                elif pattern_failure.search(line):
-                    total_failure += 1
-                    hourly_data[hour]["failure"] += 1
+            time_match = time_pattern.match(line)
+            if not time_match:
+                continue
 
-    overall_success_rate = (total_success / (total_success + total_failure) * 100
-                             if (total_success + total_failure) else 0)
+            hour = time_match.group(1)
 
-    return round(overall_success_rate, 2), hourly_data
+            # Ensure the hour entry exists
+            if hour not in hourly_data:
+                hourly_data[hour] = {"success": 0, "failure": 0}
+
+            if success_pattern.search(line):
+                total_success += 1
+                hourly_data[hour]["success"] += 1
+            elif failure_pattern.search(line):
+                total_failure += 1
+                hourly_data[hour]["failure"] += 1
+
+    total = total_success + total_failure
+    success_rate = (total_success / total * 100) if total else 0
+
+    return round(success_rate, 2), hourly_data
