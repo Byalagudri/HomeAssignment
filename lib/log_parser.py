@@ -1,7 +1,4 @@
 import re
-from collections import defaultdict
-
-import re
 
 def parse_msg3_logs(log_path):
     success_pattern = re.compile(r"type\s+MSG3.*?status\s+success", re.IGNORECASE)
